@@ -57,10 +57,7 @@
     mix-blend-mode:soft-light;
   }
 
-  body::after{
-    background:linear-gradient(120deg, rgba(255,255,255,.12), transparent 24%, transparent 76%, rgba(255,255,255,.08));
-    opacity:.3;
-  }
+  body::after{display:none;}
 
   #confetti-canvas{
     position:fixed;
@@ -70,41 +67,7 @@
   }
 
 
-  .ambient{
-    position:fixed;
-    border-radius:50%;
-    filter:blur(18px);
-    pointer-events:none;
-    opacity:.38;
-    z-index:0;
-    animation:drift 14s ease-in-out infinite;
-  }
-
-  .ambient-a{
-    width:18rem;
-    height:18rem;
-    top:7vh;
-    left:-4rem;
-    background:radial-gradient(circle, rgba(255,208,115,.72), transparent 68%);
-  }
-
-  .ambient-b{
-    width:20rem;
-    height:20rem;
-    right:-5rem;
-    top:18vh;
-    background:radial-gradient(circle, rgba(255,144,99,.55), transparent 70%);
-    animation-delay:-4s;
-  }
-
-  .ambient-c{
-    width:24rem;
-    height:24rem;
-    bottom:-7rem;
-    left:35%;
-    background:radial-gradient(circle, rgba(255,236,194,.30), transparent 68%);
-    animation-delay:-8s;
-  }
+  .ambient,.ambient-a,.ambient-b,.ambient-c{display:none;}
 
   .page{
     position:fixed;
@@ -115,9 +78,8 @@
     padding:5.2rem 1.25rem 8.5rem;
     opacity:0;
     pointer-events:none;
-    transform:translate3d(4.5rem,0,0) scale(.98);
-    filter:blur(10px);
-    transition:opacity .78s var(--ease), transform .78s var(--ease), filter .78s var(--ease);
+    transform:translate3d(28px,0,0);
+    transition:opacity .55s var(--ease), transform .55s var(--ease);
     overflow-y:auto;
     isolation:isolate;
     z-index:1;
@@ -136,33 +98,29 @@
   .page.active{
     opacity:1;
     pointer-events:auto;
-    transform:translate3d(0,0,0) scale(1);
-    filter:blur(0);
+    transform:translate3d(0,0,0);
   }
 
   .page.exit-left{
     opacity:0;
-    transform:translate3d(-4.5rem,0,0) scale(.98);
-    filter:blur(12px);
+    transform:translate3d(-28px,0,0);
   }
 
   .page.exit-right{
     opacity:0;
-    transform:translate3d(4.5rem,0,0) scale(.98);
-    filter:blur(12px);
+    transform:translate3d(28px,0,0);
   }
 
-  .page.enter-left{transform:translate3d(-4.5rem,0,0) scale(.98);}
-  .page.enter-right{transform:translate3d(4.5rem,0,0) scale(.98);}
+  .page.enter-left{transform:translate3d(-28px,0,0);}
+  .page.enter-right{transform:translate3d(28px,0,0);}
 
   .page-shell{
     position:relative;
     width:min(100%, 68rem);
     border-radius:2rem;
-    border:1px solid rgba(255,255,255,.24);
-    background:linear-gradient(180deg, rgba(255,252,247,.88), rgba(255,244,232,.72));
-    box-shadow:var(--shadow);
-    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.18);
+    background:linear-gradient(180deg, rgba(255,252,247,.94), rgba(255,244,232,.82));
+    box-shadow:0 16px 42px rgba(0,0,0,.14);
     overflow:hidden;
     padding:clamp(1.75rem, 4vw, 3rem);
   }
@@ -183,7 +141,7 @@
   }
 
   .page.active .reveal{
-    animation:revealUp .8s var(--ease) forwards;
+    animation:revealUp .45s ease-out forwards;
     animation-delay:var(--delay, 0s);
   }
 
@@ -761,7 +719,7 @@
   }
 
   @keyframes revealUp{
-    from{opacity:0;transform:translateY(1.35rem);}
+    from{opacity:0;transform:translateY(12px);}
     to{opacity:1;transform:translateY(0);}
   }
 
@@ -1040,7 +998,7 @@
   const petalColors = ["#ffd580", "#ff9860", "#ffb347", "#ffcba4", "#ff6b35"];
   const heroPage = document.getElementById("page1");
 
-  for (let i = 0; i < 20; i += 1) {
+  for (let i = 0; i < 10; i += 1) {
     const petal = document.createElement("div");
     petal.className = "petal";
     petal.style.cssText = [
@@ -1060,7 +1018,7 @@
   }
 
   const petalStyle = document.createElement("style");
-  petalStyle.textContent = "@keyframes petalFall{0%{transform:translateY(-4rem) rotate(0deg);opacity:0;}12%{opacity:.5;}100%{transform:translateY(112vh) rotate(680deg);opacity:0;}}";
+  petalStyle.textContent = "@keyframes petalFall{0%{transform:translateY(-4rem) rotate(0deg);opacity:0;}16%{opacity:.45;}100%{transform:translateY(108vh) rotate(540deg);opacity:0;}}";
   document.head.appendChild(petalStyle);
 
   const photoGrid = document.getElementById("photoGrid");
@@ -1149,7 +1107,7 @@
   }
 
   function launchConfetti() {
-    for (let i = 0; i < 180; i += 1) {
+    for (let i = 0; i < 80; i += 1) {
       particles.push({
         x: Math.random() * canvas.width,
         y: -10 - Math.random() * 160,
