@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gallery Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0d0a0a;
+    --panel:#151012;
+    --border:rgba(255,255,255,.12);
+    --text:#f8f2ea;
+    --muted:#d5c7b8;
+    --accent1:#e9834d;
+    --accent2:#cfa34f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.04), transparent 32%),
+      radial-gradient(circle at 80% 12%, rgba(255,255,255,.05), transparent 30%),
+      linear-gradient(145deg, #120c0d, #0c0a0a);
+    color:var(--text);
+    font-family:"Manrope",sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:1.6rem;
+  }
+  .card{
+    width:min(960px, 100%);
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:1.6rem;
+    box-shadow:0 24px 70px rgba(0,0,0,.35);
+  }
+  h1{
+    font-size:1.4rem;
+    letter-spacing:.04em;
+    margin-bottom:.45rem;
+  }
+  p.lead{
+    color:var(--muted);
+    margin-bottom:1rem;
+    line-height:1.6;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+    gap:.75rem;
+    margin:1rem 0 1.25rem;
+  }
+  .tile{
+    position:relative;
+    aspect-ratio:3/4;
+    border-radius:12px;
+    overflow:hidden;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.02);
+    display:grid;
+    place-items:center;
+    color:var(--muted);
+    text-align:center;
+    padding:.6rem;
+  }
+  .tile img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.8rem;
+    align-items:center;
+  }
+  .btn{
+    padding:.8rem 1.1rem;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:linear-gradient(135deg, var(--accent2), var(--accent1));
+    color:#0c0705;
+    font-weight:800;
+    letter-spacing:.06em;
+    cursor:pointer;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .btn.secondary{
+    background:rgba(255,255,255,.06);
+    color:var(--text);
+  }
+  .btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 26px rgba(0,0,0,.28);
+  }
+  .hint{
+    color:var(--muted);
+    font-size:.92rem;
+  }
+  .drop{
+    border:1px dashed rgba(255,255,255,.25);
+    border-radius:14px;
+    padding:1rem;
+    text-align:center;
+    margin:1rem 0;
+    color:var(--muted);
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .drop:hover{
+    border-color:rgba(255,255,255,.45);
+    background:rgba(255,255,255,.04);
+  }
+  @media (max-width:640px){
+    .controls{flex-direction:column;align-items:stretch;}
+    .btn{width:100%;text-align:center;}
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Gallery Admin</h1>
+    <p class="lead">Upload up to 8 photos for the main site gallery. Changes are stored in this browser (local storage). If you clear site data, re-upload here.</p>
+
+    <div class="drop" onclick="fileInput.click()">Click to choose images (JPG/PNG) — up to 8</div>
+    <input id="fileInput" type="file" accept="image/*" multiple style="display:none" />
+
+    <div class="grid" id="previewGrid"></div>
+
+    <div class="controls">
+      <button class="btn" onclick="save()">Save to gallery</button>
+      <button class="btn secondary" onclick="resetDefaults()">Reset to defaults</button>
+      <span class="hint" id="statusHint"></span>
+    </div>
+  </div>
+
+<script>
+  const DEFAULTS = [
+    "photos/photo1.jpg",
+    "photos/photo2.jpg",
+    "photos/photo3.jpg",
+    "photos/photo4.jpg"
+  ];
+
+  const fileInput = document.getElementById("fileInput");
+  const grid = document.getElementById("previewGrid");
+  const statusHint = document.getElementById("statusHint");
+  let pending = [];
+
+  function setStatus(msg) {
+    statusHint.textContent = msg || "";
+  }
+
+  function getStored() {
+    try {
+      const raw = localStorage.getItem("galleryImages");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setStored(list) {
+    localStorage.setItem("galleryImages", JSON.stringify(list));
+  }
+
+  function buildGrid(images) {
+    grid.innerHTML = "";
+    images.forEach(src => {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "Gallery image";
+      img.onerror = () => tile.textContent = "Missing image";
+      tile.appendChild(img);
+      grid.appendChild(tile);
+    });
+  }
+
+  function loadInitial() {
+    const stored = getStored();
+    buildGrid(stored || DEFAULTS);
+    setStatus(stored ? "Loaded from saved gallery" : "Showing defaults");
+  }
+
+  fileInput.addEventListener("change", e => {
+    pending = Array.from(e.target.files || []).slice(0, 8);
+    if (!pending.length) {
+      setStatus("No files selected");
+      return;
+    }
+    const readers = pending.map(
+      file =>
+        new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = ev => resolve(ev.target.result);
+          reader.readAsDataURL(file);
+        })
+    );
+    Promise.all(readers).then(images => {
+      buildGrid(images);
+      pending = images;
+      setStatus("Ready to save");
+    });
+  });
+
+  function save() {
+    if (!pending.length) {
+      setStatus("Select images first");
+      return;
+    }
+    setStored(pending);
+    setStatus("Saved. Open PAGE1.HTML to view.");
+  }
+
+  function resetDefaults() {
+    localStorage.removeItem("galleryImages");
+    pending = [];
+    buildGrid(DEFAULTS);
+    setStatus("Reset to defaults");
+  }
+
+  loadInitial();
+</script>
+</body>
+</html>
