@@ -126,7 +126,7 @@
 <body>
   <div class="card">
     <h1>Gallery Admin</h1>
-    <p class="lead">Upload up to 8 photos for the main site gallery. Changes are stored in this browser (local storage). If you clear site data, re-upload here.</p>
+    <p class="lead">Upload up to 8 photos for the main site gallery. Files are stored in Supabase Storage (`photos` bucket).</p>
 
     <div class="drop" onclick="fileInput.click()">Click to choose images (JPG/PNG) — up to 8</div>
     <input id="fileInput" type="file" accept="image/*" multiple style="display:none" />
@@ -134,7 +134,7 @@
     <div class="grid" id="previewGrid"></div>
 
     <div class="controls">
-      <button class="btn" onclick="save()">Save to gallery</button>
+      <button class="btn" onclick="save()">Upload</button>
       <button class="btn secondary" onclick="resetDefaults()">Reset to defaults</button>
       <span class="hint" id="statusHint"></span>
     </div>
@@ -176,10 +176,9 @@
       sortBy: { column: "created_at", order: "desc" }
     });
     if (error) {
-      setStatus("Could not load existing images");
-      console.warn(error);
-      buildGrid([]);
-      return;
+      setStatus("Could not load existing images (check bucket permissions)");
+      console.warn("List error", error);
+      return buildGrid([]);
     }
     const urls = data.map(obj => supa.storage.from(BUCKET).getPublicUrl(obj.name).data.publicUrl);
     buildGrid(urls);
@@ -200,7 +199,7 @@
       setStatus("Select images first");
       return;
     }
-    setStatus("Uploading...");
+    setStatus("Uploading to Supabase...");
     for (const file of pendingFiles) {
       const filename = `${Date.now()}-${file.name}`;
       const { error } = await supa.storage.from(BUCKET).upload(filename, file, {
@@ -208,7 +207,7 @@
         upsert: false
       });
       if (error) {
-        setStatus(`Upload failed: ${file.name}`);
+        setStatus(`Upload failed: ${file.name} (${error.message || error})`);
         console.warn(error);
         return;
       }
