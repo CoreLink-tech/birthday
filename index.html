@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Happy Birthday - Pst. Mrs. Providence Ugbine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg-deep:#471909;
+    --bg-warm:#8d3f1e;
+    --bg-soft:#d98d4f;
+    --gold:#dca54a;
+    --gold-strong:#b97816;
+    --coral:#ee7d55;
+    --ink:#52291d;
+    --ink-soft:#7a4a35;
+    --line:rgba(109,61,37,.16);
+    --shadow:0 24px 70px rgba(74,29,9,.18);
+    --shadow-strong:0 34px 100px rgba(45,16,5,.35);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html,body{
+    min-height:100%;
+    font-family:"Manrope",sans-serif;
+    color:var(--ink);
+    overflow:hidden;
+  }
+
+  body{
+    position:relative;
+    background:
+      radial-gradient(circle at top, rgba(255,221,157,.24), transparent 32%),
+      radial-gradient(circle at 18% 18%, rgba(255,161,111,.20), transparent 26%),
+      radial-gradient(circle at 82% 24%, rgba(255,235,184,.15), transparent 20%),
+      linear-gradient(140deg, var(--bg-deep) 0%, var(--bg-warm) 44%, var(--bg-soft) 100%);
+  }
+
+  body::before,
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  body::before{
+    background:radial-gradient(circle at center, rgba(255,255,255,.12) 1px, transparent 1px);
+    background-size:24px 24px;
+    opacity:.18;
+    mix-blend-mode:soft-light;
+  }
+
+  body::after{
+    background:linear-gradient(120deg, rgba(255,255,255,.12), transparent 24%, transparent 76%, rgba(255,255,255,.08));
+    opacity:.3;
+  }
+
+  #confetti-canvas{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:20;
+  }
+
+
+  .ambient{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(18px);
+    pointer-events:none;
+    opacity:.38;
+    z-index:0;
+    animation:drift 14s ease-in-out infinite;
+  }
+
+  .ambient-a{
+    width:18rem;
+    height:18rem;
+    top:7vh;
+    left:-4rem;
+    background:radial-gradient(circle, rgba(255,208,115,.72), transparent 68%);
+  }
+
+  .ambient-b{
+    width:20rem;
+    height:20rem;
+    right:-5rem;
+    top:18vh;
+    background:radial-gradient(circle, rgba(255,144,99,.55), transparent 70%);
+    animation-delay:-4s;
+  }
+
+  .ambient-c{
+    width:24rem;
+    height:24rem;
+    bottom:-7rem;
+    left:35%;
+    background:radial-gradient(circle, rgba(255,236,194,.30), transparent 68%);
+    animation-delay:-8s;
+  }
+
+  .page{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:5.2rem 1.25rem 8.5rem;
+    opacity:0;
+    pointer-events:none;
+    transform:translate3d(4.5rem,0,0) scale(.98);
+    filter:blur(10px);
+    transition:opacity .78s var(--ease), transform .78s var(--ease), filter .78s var(--ease);
+    overflow-y:auto;
+    isolation:isolate;
+    z-index:1;
+  }
+
+  .page::before{
+    content:"";
+    position:absolute;
+    inset:1.5rem;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:2rem;
+    pointer-events:none;
+    opacity:.7;
+  }
+
+  .page.active{
+    opacity:1;
+    pointer-events:auto;
+    transform:translate3d(0,0,0) scale(1);
+    filter:blur(0);
+  }
+
+  .page.exit-left{
+    opacity:0;
+    transform:translate3d(-4.5rem,0,0) scale(.98);
+    filter:blur(12px);
+  }
+
+  .page.exit-right{
+    opacity:0;
+    transform:translate3d(4.5rem,0,0) scale(.98);
+    filter:blur(12px);
+  }
+
+  .page.enter-left{transform:translate3d(-4.5rem,0,0) scale(.98);}
+  .page.enter-right{transform:translate3d(4.5rem,0,0) scale(.98);}
+
+  .page-shell{
+    position:relative;
+    width:min(100%, 68rem);
+    border-radius:2rem;
+    border:1px solid rgba(255,255,255,.24);
+    background:linear-gradient(180deg, rgba(255,252,247,.88), rgba(255,244,232,.72));
+    box-shadow:var(--shadow);
+    backdrop-filter:blur(20px);
+    overflow:hidden;
+    padding:clamp(1.75rem, 4vw, 3rem);
+  }
+
+  .page-shell::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.34), transparent 36%, transparent 68%, rgba(255,255,255,.12)),
+      radial-gradient(circle at top right, rgba(255,227,180,.28), transparent 28%);
+    pointer-events:none;
+  }
+
+  .reveal{
+    opacity:0;
+    transform:translateY(1.35rem);
+  }
+
+  .page.active .reveal{
+    animation:revealUp .8s var(--ease) forwards;
+    animation-delay:var(--delay, 0s);
+  }
+
+  .step-dots{
+    position:fixed;
+    top:1rem;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    gap:.55rem;
+    padding:.8rem 1rem;
+    border-radius:999px;
+    background:rgba(255,247,238,.2);
+    border:1px solid rgba(255,255,255,.2);
+    backdrop-filter:blur(16px);
+    z-index:30;
+    box-shadow:0 10px 30px rgba(46,17,5,.18);
+  }
+
+  .dot{
+    width:.6rem;
+    height:.6rem;
+    border-radius:999px;
+    background:rgba(112,61,34,.18);
+    border:1px solid rgba(255,255,255,.25);
+    transition:transform .3s ease, background .3s ease, width .3s ease;
+  }
+
+  .dot.active{
+    width:1.75rem;
+    background:linear-gradient(90deg, var(--gold), var(--coral));
+    transform:scale(1.02);
+  }
+
+  .dot.done{background:rgba(220,165,74,.62);}
+
+  .nav-row{
+    position:fixed;
+    left:50%;
+    bottom:1rem;
+    transform:translateX(-50%);
+    width:min(calc(100% - 1.5rem), 34rem);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.85rem;
+    padding:.85rem 1rem;
+    border-radius:999px;
+    background:linear-gradient(180deg, rgba(255,249,242,.92), rgba(255,237,219,.66));
+    border:1px solid rgba(255,255,255,.24);
+    backdrop-filter:blur(18px);
+    box-shadow:0 18px 45px rgba(57,22,8,.2);
+    z-index:30;
+    transition:background .35s ease, border-color .35s ease;
+  }
+
+  .nav-row.is-dark{
+    background:linear-gradient(180deg, rgba(91,36,11,.82), rgba(52,19,7,.66));
+    border-color:rgba(255,224,184,.18);
+  }
+
+  .btn{
+    position:relative;
+    overflow:hidden;
+    padding:.95rem 2rem;
+    border-radius:999px;
+    border:0;
+    font:800 .92rem/1 "Manrope",sans-serif;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease;
+  }
+
+  .btn::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent);
+    transform:translateX(-120%);
+    transition:transform .45s ease;
+  }
+
+  .btn:hover{transform:translateY(-2px);}
+  .btn:hover::before{transform:translateX(120%);}
+
+  .btn:focus-visible,
+  .photo-slot:focus-visible{
+    outline:2px solid rgba(255,244,223,.95);
+    outline-offset:3px;
+  }
+
+  .btn-primary{
+    color:#fff;
+    background:linear-gradient(135deg, var(--gold), var(--coral));
+    box-shadow:0 14px 34px rgba(217,121,68,.35);
+  }
+
+  .btn-secondary{
+    color:var(--ink);
+    background:rgba(255,255,255,.7);
+    border:1px solid rgba(201,142,71,.28);
+    box-shadow:0 10px 24px rgba(92,37,12,.12);
+  }
+
+  .btn-secondary.is-dark{
+    color:#ffecc6;
+    background:rgba(255,255,255,.1);
+    border-color:rgba(255,219,170,.26);
+    box-shadow:none;
+  }
+
+  .hero-shell{
+    min-height:min(78vh, 46rem);
+    display:grid;
+    place-items:center;
+    text-align:center;
+    background:
+      radial-gradient(circle at top, rgba(255,224,162,.16), transparent 38%),
+      linear-gradient(145deg, rgba(83,30,10,.84), rgba(170,88,38,.44));
+    border-color:rgba(255,234,200,.16);
+    box-shadow:var(--shadow-strong);
+  }
+
+  .hero-shell::before{
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.14), transparent 30%, transparent 70%, rgba(255,255,255,.08)),
+      radial-gradient(circle at top, rgba(255,220,164,.22), transparent 36%);
+  }
+
+  .hero-shell::after{
+    content:"";
+    position:absolute;
+    inset:1.25rem;
+    border:1px solid rgba(255,229,187,.12);
+    border-radius:1.5rem;
+    pointer-events:none;
+  }
+
+  .hero-aura,
+  .hero-orbit{
+    position:absolute;
+    pointer-events:none;
+  }
+
+  .hero-aura{
+    width:20rem;
+    height:20rem;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,212,128,.34), transparent 68%);
+    top:calc(50% - 10rem);
+    left:calc(50% - 10rem);
+    filter:blur(16px);
+    animation:pulseGlow 4.8s ease-in-out infinite;
+  }
+
+  .hero-orbit{
+    border:1px solid rgba(255,231,182,.16);
+    border-radius:50%;
+    animation:spin 18s linear infinite;
+  }
+
+  .hero-orbit.orbit-a{
+    width:22rem;
+    height:22rem;
+  }
+
+  .hero-orbit.orbit-b{
+    width:30rem;
+    height:30rem;
+    animation-direction:reverse;
+    animation-duration:24s;
+  }
+
+  .hero-content{
+    position:relative;
+    z-index:1;
+    width:min(100%, 40rem);
+  }
+
+  .hero-tag{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.65rem;
+    padding:.7rem 1rem;
+    margin-bottom:1.2rem;
+    border-radius:999px;
+    background:rgba(255,244,221,.12);
+    border:1px solid rgba(255,233,189,.18);
+    color:#ffe7ba;
+    font-size:.8rem;
+    font-weight:800;
+    letter-spacing:.26em;
+    text-transform:uppercase;
+  }
+
+  .hero-title{
+    font-family:"Cormorant Garamond",serif;
+    font-size:clamp(3.5rem, 10vw, 6.8rem);
+    line-height:.88;
+    letter-spacing:.01em;
+    color:#fff8ee;
+    text-shadow:0 8px 32px rgba(0,0,0,.22);
+    text-wrap:balance;
+  }
+
+  .hero-title em{
+    display:block;
+    font-style:normal;
+    color:#ffd993;
+  }
+
+  .hero-name{
+    margin-top:1rem;
+    font-family:"Cormorant Garamond",serif;
+    font-size:clamp(1.3rem, 4vw, 2.2rem);
+    font-weight:600;
+    color:#fff0cf;
+  }
+
+  .hero-sub{
+    width:min(100%, 34rem);
+    margin:1rem auto 1.35rem;
+    color:rgba(255,244,223,.82);
+    font-size:1rem;
+    line-height:1.7;
+  }
+
+  .hero-icons{
+    display:flex;
+    justify-content:center;
+    gap:.8rem;
+    margin-bottom:1.35rem;
+    font-size:2rem;
+  }
+
+  .hero-icons span{
+    display:grid;
+    place-items:center;
+    width:3.2rem;
+    height:3.2rem;
+    border-radius:50%;
+    background:rgba(255,249,238,.1);
+    border:1px solid rgba(255,228,184,.16);
+    animation:floatBadge 4.2s ease-in-out infinite;
+  }
+
+  .hero-icons span:nth-child(2){animation-delay:.4s;}
+  .hero-icons span:nth-child(3){animation-delay:.8s;}
+  .hero-icons span:nth-child(4){animation-delay:1.2s;}
+
+  .hero-ribbon{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:.75rem;
+  }
+
+  .hero-ribbon span{
+    padding:.7rem 1rem;
+    border-radius:999px;
+    background:rgba(255,247,232,.12);
+    border:1px solid rgba(255,233,198,.18);
+    color:#fff2d4;
+    font-size:.84rem;
+    letter-spacing:.08em;
+  }
+
+  .content-shell{width:min(100%, 58rem);}
+
+  .section-label{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.6rem;
+    margin-bottom:.95rem;
+    padding:.55rem .95rem;
+    border-radius:999px;
+    background:rgba(238,125,85,.1);
+    color:var(--coral);
+    font-size:.78rem;
+    font-weight:800;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+  }
+
+  h2{
+    font-family:"Cormorant Garamond",serif;
+    font-size:clamp(2.1rem, 5vw, 3.4rem);
+    line-height:1;
+    color:var(--ink);
+    margin-bottom:1rem;
+    text-wrap:balance;
+  }
+
+  .section-copy{
+    color:var(--ink-soft);
+    font-size:1rem;
+    line-height:1.8;
+    text-align:center;
+    max-width:40rem;
+    margin:0 auto;
+  }
+
+  .divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.85rem;
+    margin:1.8rem auto 2rem;
+  }
+
+  .divider-line{
+    width:min(7rem, 20vw);
+    height:1px;
+    background:linear-gradient(90deg, transparent, rgba(220,165,74,.84), transparent);
+  }
+
+  .divider-icon{
+    display:grid;
+    place-items:center;
+    width:2.75rem;
+    height:2.75rem;
+    border-radius:50%;
+    background:rgba(220,165,74,.12);
+    color:var(--gold-strong);
+    box-shadow:inset 0 0 0 1px rgba(220,165,74,.18);
+    font-size:1.15rem;
+  }
+
+  .message-card,
+  .verse-card{
+    position:relative;
+    overflow:hidden;
+    border-radius:1.6rem;
+  }
+
+  .message-card{
+    padding:2.2rem;
+    background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,246,234,.95));
+    border:1px solid rgba(220,165,74,.18);
+    box-shadow:0 16px 42px rgba(87,39,16,.12);
+    transition:transform .3s ease, box-shadow .3s ease;
+  }
+
+  .message-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 22px 52px rgba(87,39,16,.16);
+  }
+
+  .message-card::before{
+    content:"";
+    position:absolute;
+    width:12rem;
+    height:12rem;
+    top:-5rem;
+    right:-4rem;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(248,199,178,.42), transparent 72%);
+  }
+
+  .message-card::after{
+    content:"";
+    position:absolute;
+    inset:1rem;
+    border:1px solid rgba(220,165,74,.12);
+    border-radius:1.15rem;
+    pointer-events:none;
+  }
+
+  .message-card p{
+    position:relative;
+    z-index:1;
+    color:var(--ink-soft);
+    font-size:1rem;
+    line-height:1.9;
+    margin-bottom:.9rem;
+  }
+
+  .message-card p:last-of-type{margin-bottom:0;}
+
+  .signature{
+    position:relative;
+    z-index:1;
+    margin-top:1.5rem;
+    padding-top:1rem;
+    border-top:1px solid var(--line);
+    color:var(--coral);
+    text-align:right;
+    font-weight:700;
+    letter-spacing:.04em;
+  }
+
+  #page3 .page-shell,
+  #page5 .page-shell{
+    color:#fff;
+    background:
+      radial-gradient(circle at top, rgba(255,216,149,.12), transparent 36%),
+      linear-gradient(150deg, rgba(70,24,9,.92), rgba(146,67,28,.58));
+    border-color:rgba(255,225,181,.14);
+    box-shadow:var(--shadow-strong);
+  }
+
+  #page3 h2,
+  #page5 h2{color:#fff5df;}
+
+  #page3 .section-label,
+  #page5 .section-label{
+    background:rgba(255,229,176,.08);
+    color:#ffe0a6;
+  }
+
+  .verse-card{
+    max-width:40rem;
+    margin:0 auto;
+    padding:2.3rem;
+    background:linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.05));
+    border:1px solid rgba(255,224,184,.18);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+    backdrop-filter:blur(12px);
+  }
+
+  .verse-card::before{
+    content:"";
+    position:absolute;
+    inset:-35%;
+    background:conic-gradient(from 180deg, transparent, rgba(255,231,185,.14), transparent 42%);
+    animation:spin 12s linear infinite;
+  }
+
+  .verse-card > *{
+    position:relative;
+    z-index:1;
+  }
+
+  .verse-text{
+    font-family:"Cormorant Garamond",serif;
+    font-size:clamp(1.45rem, 3.3vw, 2rem);
+    line-height:1.6;
+    color:#fff1cf;
+    font-weight:600;
+    margin-bottom:1.35rem;
+  }
+
+  .verse-ref{
+    color:rgba(255,240,212,.72);
+    font-size:.84rem;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+  }
+
+  .gallery-note{margin-bottom:1.5rem;}
+
+  .photo-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(13rem, 1fr));
+    gap:0;
+    width:100%;
+    align-items:stretch;
+  }
+
+  .photo-slot{
+    position:relative;
+    aspect-ratio:3/4;
+    border-radius:.6rem;
+    border:0;
+    background:#000;
+    overflow:hidden;
+    cursor:default;
+    transition:transform .35s ease, box-shadow .35s ease;
+    box-shadow:0 10px 26px rgba(20,12,6,.14);
+  }
+
+  .photo-slot:hover{
+    transform:translateY(-3px) scale(1.01);
+    box-shadow:0 16px 34px rgba(20,12,6,.2);
+  }
+
+  .photo-slot.missing{
+    background:repeating-linear-gradient(45deg, rgba(255,255,255,.08) 0 12px, rgba(0,0,0,.08) 12px 24px);
+    color:rgba(255,255,255,.6);
+    display:grid;
+    place-items:center;
+    text-align:center;
+    padding:1rem;
+    font-weight:700;
+    letter-spacing:.08em;
+  }
+
+  .photo-slot img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    background:#000;
+    transition:transform .55s ease;
+  }
+
+  .photo-slot:hover img{transform:scale(1.06);}
+
+  .celebrate-btn{
+    position:relative;
+    overflow:hidden;
+    margin-top:1.4rem;
+    padding:.95rem 1.65rem;
+    border:0;
+    border-radius:999px;
+    color:#fff;
+    background:linear-gradient(135deg, var(--gold), var(--coral));
+    box-shadow:0 16px 34px rgba(217,121,68,.28);
+    font:800 .92rem/1 "Manrope",sans-serif;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+
+  .celebrate-btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 22px 42px rgba(217,121,68,.34);
+  }
+
+
+  .outro-shell{
+    text-align:center;
+    width:min(100%, 44rem);
+    margin:0 auto;
+  }
+
+  .outro-crown{
+    display:grid;
+    place-items:center;
+    width:5.5rem;
+    height:5.5rem;
+    margin:0 auto 1.4rem;
+    border-radius:50%;
+    background:rgba(255,236,196,.1);
+    border:1px solid rgba(255,226,182,.16);
+    font-size:2.4rem;
+    animation:floatBadge 4s ease-in-out infinite;
+  }
+
+  .outro-title{
+    font-family:"Cormorant Garamond",serif;
+    font-size:clamp(2.8rem, 7vw, 5rem);
+    line-height:.95;
+    color:#ffe8b6;
+    text-shadow:0 8px 30px rgba(0,0,0,.24);
+  }
+
+  .outro-subtitle{
+    margin:1rem auto 1.1rem;
+    max-width:34rem;
+    color:rgba(255,244,221,.86);
+    font-size:1rem;
+    line-height:1.8;
+  }
+
+  .outro-verse{
+    color:rgba(255,226,184,.74);
+    font-size:.85rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+  }
+
+  .outro-footer{
+    margin-top:1.25rem;
+    color:rgba(255,245,227,.48);
+    font-size:.8rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+  }
+
+  @keyframes revealUp{
+    from{opacity:0;transform:translateY(1.35rem);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  @keyframes floatBadge{
+    0%,100%{transform:translateY(0) rotate(-2deg);}
+    50%{transform:translateY(-.75rem) rotate(2deg);}
+  }
+
+  @keyframes pulseGlow{
+    0%,100%{transform:scale(.92);opacity:.55;}
+    50%{transform:scale(1.05);opacity:.8;}
+  }
+
+  @keyframes drift{
+    0%,100%{transform:translate3d(0,0,0);}
+    50%{transform:translate3d(1rem,-1.25rem,0);}
+  }
+
+  @keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+  }
+
+  @media (max-width:720px){
+    .page{padding:4.5rem 1rem 8rem;}
+
+    .page::before{
+      inset:1rem;
+      border-radius:1.35rem;
+    }
+
+    .page-shell{
+      border-radius:1.5rem;
+      padding:1.4rem;
+    }
+
+    .hero-tag{
+      letter-spacing:.18em;
+      font-size:.72rem;
+    }
+
+    .hero-ribbon{gap:.55rem;}
+    .hero-ribbon span{width:100%;}
+
+    .message-card,
+    .verse-card{padding:1.5rem;}
+
+    .photo-grid{
+      grid-template-columns:repeat(auto-fit, minmax(10rem, 1fr));
+      gap:.85rem;
+    }
+
+    .nav-row{
+      width:min(calc(100% - 1rem), 34rem);
+      gap:.6rem;
+      padding:.7rem .8rem;
+    }
+
+    .btn{
+      flex:1;
+      padding:.9rem 1rem;
+      font-size:.82rem;
+      letter-spacing:.08em;
+    }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *, *::before, *::after{
+      animation:none !important;
+      transition:none !important;
+      scroll-behavior:auto !important;
+    }
+
+    .page{
+      filter:none;
+      transform:none;
+    }
+
+    .reveal{
+      opacity:1;
+      transform:none;
+    }
+  }
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div class="ambient ambient-a"></div>
+<div class="ambient ambient-b"></div>
+<div class="ambient ambient-c"></div>
+
+<div class="step-dots" aria-hidden="true">
+  <div class="dot active"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+</div>
+
+
+<div class="page active" id="page1">
+  <div class="page-shell hero-shell">
+    <div class="hero-aura"></div>
+    <div class="hero-orbit orbit-a"></div>
+    <div class="hero-orbit orbit-b"></div>
+
+    <div class="hero-content">
+      <div class="hero-tag reveal" style="--delay:.08s;">A Celebration of Grace</div>
+      <h1 class="hero-title reveal" style="--delay:.16s;">Happy <em>Birthday!</em></h1>
+      <div class="hero-name reveal" style="--delay:.24s;">Pst. Mrs. Providence Ugbine</div>
+      <p class="hero-sub reveal" style="--delay:.32s;">May your day shine with peace, favor, joy, and the kind of warmth your life has poured into so many others.</p>
+      <div class="hero-icons reveal" style="--delay:.40s;">
+        <span>&#127874;</span>
+        <span>&#127800;</span>
+        <span>&#128591;</span>
+        <span>&#127881;</span>
+      </div>
+      <div class="hero-ribbon reveal" style="--delay:.48s;">
+        <span>Grace-filled life</span>
+        <span>Honored woman of faith</span>
+        <span>Celebrated with love</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page2">
+  <div class="page-shell content-shell">
+    <div class="section-label reveal" style="--delay:.08s;">With love and gratitude</div>
+    <h2 class="reveal" style="--delay:.16s;">A message written with warmth</h2>
+    <p class="section-copy reveal" style="--delay:.24s;">Every part of this page is shaped to feel more personal and ceremonial, not generic. The message stays central and easy to read while the card carries the visual weight.</p>
+    <div class="divider reveal" style="--delay:.32s;">
+      <div class="divider-line"></div>
+      <div class="divider-icon">&#127801;</div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="message-card reveal" style="--delay:.40s;">
+      <p>Dear Pst. Mrs. Providence Ugbine,</p>
+      <p>On this beautiful and blessed day, we celebrate a woman whose life reflects grace, steady faith, and deep love for God and His people.</p>
+      <p>Your presence has brought strength to many hearts. Through wisdom, gentleness, and devotion, you have become a source of encouragement and a light within your community.</p>
+      <p>As another year opens before you, may the goodness of God rest upon you in fresh ways. May joy overflow, peace remain constant, and every seed of purpose within you flourish.</p>
+      <p>We are grateful for your life, your example, and your heart. Happy Birthday, Ma. &#127874;&#10024;</p>
+      <div class="signature">With love and prayers, from the congregation &#128591;</div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page3">
+  <div class="page-shell content-shell">
+    <div class="section-label reveal" style="--delay:.08s;">God's Word over your life</div>
+    <h2 class="reveal" style="--delay:.16s;">A scripture of blessing</h2>
+    <p class="section-copy reveal" style="--delay:.24s;">The darker treatment on this slide gives the verse its own atmosphere, so it feels reflective and set apart from the other pages.</p>
+    <div class="verse-card reveal" style="--delay:.36s;">
+      <div class="verse-text">
+        "The Lord bless you and keep you;<br />
+        the Lord make his face shine on you<br />
+        and be gracious to you;<br />
+        the Lord turn his face toward you<br />
+        and give you peace."
+      </div>
+      <div class="verse-ref">Numbers 6:24-26 &middot; NIV</div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page4">
+  <div class="page-shell content-shell">
+    <div class="section-label reveal" style="--delay:.08s;">Photo gallery</div>
+    <h2 class="reveal" style="--delay:.16s;">Moments with you</h2>
+    <div class="divider reveal" style="--delay:.24s;">
+      <div class="divider-line"></div>
+      <div class="divider-icon">&#128248;</div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="photo-grid reveal" id="photoGrid" style="--delay:.32s;"></div>
+  </div>
+</div>
+
+<div class="page" id="page5">
+  <div class="page-shell outro-shell">
+    <div class="section-label reveal" style="--delay:.08s;">Final blessing</div>
+    <div class="outro-crown reveal" style="--delay:.16s;">&#128081;</div>
+    <div class="outro-title reveal" style="--delay:.24s;">God's best<br />is upon you</div>
+    <div class="outro-subtitle reveal" style="--delay:.32s;">Pst. Mrs. Providence Ugbine, may this new year be full of grace, health, answered prayers, and beautiful surprises that reflect the goodness of God.</div>
+    <div class="outro-verse reveal" style="--delay:.40s;">Jeremiah 29:11 - "For I know the plans I have for you..."</div>
+    <button class="celebrate-btn reveal" style="--delay:.48s;" type="button" onclick="launchConfetti()">Celebrate Again</button>
+    <div class="outro-footer reveal" style="--delay:.56s;">Made with love in honor of a wonderful woman of God</div>
+  </div>
+</div>
+
+<div class="nav-row is-dark" id="navRow">
+  <button class="btn btn-secondary is-dark" id="backBtn" type="button" onclick="goBack()" style="display:none;">Back</button>
+  <button class="btn btn-primary" id="continueBtn" type="button" onclick="goForward()">Continue</button>
+</div>
+
+
+<script>
+  let current = 0;
+  const pages = Array.from(document.querySelectorAll(".page"));
+  const dots = Array.from(document.querySelectorAll(".dot"));
+  const backBtn = document.getElementById("backBtn");
+  const continueBtn = document.getElementById("continueBtn");
+  const navRow = document.getElementById("navRow");
+  const TOTAL = pages.length;
+  const darkPages = new Set([0, 2, 4]);
+
+  function syncUi() {
+    dots.forEach((dot, index) => {
+      dot.classList.toggle("active", index === current);
+      dot.classList.toggle("done", index < current);
+    });
+
+    backBtn.style.display = current > 0 ? "inline-flex" : "none";
+    continueBtn.style.display = current === TOTAL - 1 ? "none" : "inline-flex";
+
+    const dark = darkPages.has(current);
+    navRow.classList.toggle("is-dark", dark);
+    backBtn.classList.toggle("is-dark", dark);
+  }
+
+  function clearMotionClasses(page) {
+    page.classList.remove("enter-left", "enter-right", "exit-left", "exit-right");
+  }
+
+  function goTo(next) {
+    if (next === current || next < 0 || next >= TOTAL) {
+      return;
+    }
+
+    const direction = next > current ? "forward" : "backward";
+    const outgoing = pages[current];
+    const incoming = pages[next];
+
+    clearMotionClasses(outgoing);
+    clearMotionClasses(incoming);
+
+    outgoing.classList.remove("active");
+    outgoing.classList.add(direction === "forward" ? "exit-left" : "exit-right");
+    incoming.classList.add(direction === "forward" ? "enter-right" : "enter-left");
+
+    requestAnimationFrame(() => {
+      incoming.classList.add("active");
+    });
+
+    window.setTimeout(() => {
+      clearMotionClasses(outgoing);
+      clearMotionClasses(incoming);
+    }, 820);
+
+    current = next;
+    syncUi();
+
+    if (current === TOTAL - 1) {
+      launchConfetti();
+    }
+  }
+
+  function goForward() {
+    goTo(current + 1);
+  }
+
+  function goBack() {
+    goTo(current - 1);
+  }
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "ArrowRight") {
+      goForward();
+    }
+    if (event.key === "ArrowLeft") {
+      goBack();
+    }
+  });
+
+  const petalColors = ["#ffd580", "#ff9860", "#ffb347", "#ffcba4", "#ff6b35"];
+  const heroPage = document.getElementById("page1");
+
+  for (let i = 0; i < 20; i += 1) {
+    const petal = document.createElement("div");
+    petal.className = "petal";
+    petal.style.cssText = [
+      "position:absolute",
+      "border-radius:50% 0",
+      "opacity:.45",
+      "pointer-events:none",
+      "left:" + (Math.random() * 100).toFixed(2) + "%",
+      "top:-3rem",
+      "width:" + (10 + Math.random() * 14).toFixed(0) + "px",
+      "height:" + (10 + Math.random() * 14).toFixed(0) + "px",
+      "background:" + petalColors[i % petalColors.length],
+      "animation:petalFall " + (7 + Math.random() * 7).toFixed(2) + "s linear infinite",
+      "animation-delay:" + (Math.random() * 8).toFixed(2) + "s"
+    ].join(";");
+    heroPage.appendChild(petal);
+  }
+
+  const petalStyle = document.createElement("style");
+  petalStyle.textContent = "@keyframes petalFall{0%{transform:translateY(-4rem) rotate(0deg);opacity:0;}12%{opacity:.5;}100%{transform:translateY(112vh) rotate(680deg);opacity:0;}}";
+  document.head.appendChild(petalStyle);
+
+  const photoGrid = document.getElementById("photoGrid");
+  const DEFAULT_PHOTOS = [
+    "photos/photo1.jpg",
+    "photos/photo2.jpg",
+    "photos/photo3.jpg",
+    "photos/photo4.jpg"
+  ];
+
+  function getStoredPhotos() {
+    try {
+      const data = localStorage.getItem("galleryImages");
+      if (!data) return null;
+      const parsed = JSON.parse(data);
+      if (!Array.isArray(parsed) || parsed.length === 0) return null;
+      return parsed;
+    } catch (err) {
+      console.warn("Gallery storage read failed", err);
+      return null;
+    }
+  }
+
+  function setStoredPhotos(list) {
+    try {
+      localStorage.setItem("galleryImages", JSON.stringify(list));
+    } catch (err) {
+      console.warn("Gallery storage write failed", err);
+    }
+  }
+
+  function clearGrid() {
+    while (photoGrid.firstChild) photoGrid.removeChild(photoGrid.firstChild);
+  }
+
+  function buildGallery(images) {
+    clearGrid();
+    images.forEach(src => {
+      const slot = document.createElement("div");
+      slot.className = "photo-slot";
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "Portrait of Pst. Mrs. Providence Ugbine";
+      img.onload = () => slot.classList.remove("missing");
+      img.onerror = () => {
+        slot.classList.add("missing");
+        slot.textContent = "Photo missing";
+      };
+      slot.appendChild(img);
+      photoGrid.appendChild(slot);
+    });
+  }
+
+  function loadGalleryFromStore() {
+    const stored = getStoredPhotos();
+    buildGallery(stored || DEFAULT_PHOTOS);
+  }
+
+  const canvas = document.getElementById("confetti-canvas");
+  const ctx = canvas.getContext("2d");
+  let particles = [];
+  let confettiFrame = null;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function animateConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = particles.filter(particle => particle.y < canvas.height + 24);
+
+    particles.forEach(particle => {
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+      particle.vy += 0.07;
+      particle.angle += particle.spin;
+
+      ctx.save();
+      ctx.translate(particle.x, particle.y);
+      ctx.rotate((particle.angle * Math.PI) / 180);
+      ctx.globalAlpha = 0.92;
+      ctx.fillStyle = particle.color;
+
+      if (particle.shape === "rect") {
+        ctx.fillRect(-particle.r / 2, -particle.r / 2, particle.r, particle.r * 0.55);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, particle.r / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    });
+
+    if (particles.length > 0) {
+      confettiFrame = requestAnimationFrame(animateConfetti);
+    } else {
+      confettiFrame = null;
+    }
+  }
+
+  function launchConfetti() {
+    for (let i = 0; i < 180; i += 1) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: -10 - Math.random() * 160,
+        r: 5 + Math.random() * 8,
+        color: petalColors[Math.floor(Math.random() * petalColors.length)],
+        vx: (Math.random() - 0.5) * 4,
+        vy: 2 + Math.random() * 4,
+        angle: Math.random() * 360,
+        spin: (Math.random() - 0.5) * 8,
+        shape: Math.random() > 0.5 ? "rect" : "circle"
+      });
+    }
+
+    if (!confettiFrame) {
+      animateConfetti();
+    }
+  }
+
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+  syncUi();
+  window.setTimeout(launchConfetti, 900);
+
+  loadGalleryFromStore();
+</script>
+</body>
+</html>
