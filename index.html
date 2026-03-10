@@ -958,6 +958,7 @@
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   let current = 0;
   const pages = Array.from(document.querySelectorAll(".page"));
@@ -1063,33 +1064,10 @@
   document.head.appendChild(petalStyle);
 
   const photoGrid = document.getElementById("photoGrid");
-  const DEFAULT_PHOTOS = [
-    "photos/photo1.jpg",
-    "photos/photo2.jpg",
-    "photos/photo3.jpg",
-    "photos/photo4.jpg"
-  ];
-
-  function getStoredPhotos() {
-    try {
-      const data = localStorage.getItem("galleryImages");
-      if (!data) return null;
-      const parsed = JSON.parse(data);
-      if (!Array.isArray(parsed) || parsed.length === 0) return null;
-      return parsed;
-    } catch (err) {
-      console.warn("Gallery storage read failed", err);
-      return null;
-    }
-  }
-
-  function setStoredPhotos(list) {
-    try {
-      localStorage.setItem("galleryImages", JSON.stringify(list));
-    } catch (err) {
-      console.warn("Gallery storage write failed", err);
-    }
-  }
+  const SUPA_URL = "https://npdssoxgimdtmjuerqfq.supabase.co";
+  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wZHNzb3hnaW1kdG1qdWVycWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwODAwNzAsImV4cCI6MjA4ODY1NjA3MH0.ArFq0MScykb0O0BMdS7l1jJrDpu86LUTstCAhr3g8nU";
+  const BUCKET = "photos";
+  const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
   function clearGrid() {
     while (photoGrid.firstChild) photoGrid.removeChild(photoGrid.firstChild);
@@ -1112,10 +1090,18 @@
       photoGrid.appendChild(slot);
     });
   }
-
-  function loadGalleryFromStore() {
-    const stored = getStoredPhotos();
-    buildGallery(stored || DEFAULT_PHOTOS);
+  async function fetchGallery() {
+    const { data, error } = await supa.storage.from(BUCKET).list("", {
+      limit: 50,
+      sortBy: { column: "created_at", order: "desc" }
+    });
+    if (error) {
+      console.warn("Gallery list failed", error);
+      buildGallery([]);
+      return;
+    }
+    const urls = data.map(obj => supa.storage.from(BUCKET).getPublicUrl(obj.name).data.publicUrl);
+    buildGallery(urls);
   }
 
   const canvas = document.getElementById("confetti-canvas");
@@ -1187,7 +1173,7 @@
   syncUi();
   window.setTimeout(launchConfetti, 900);
 
-  loadGalleryFromStore();
+  fetchGallery();
 </script>
 </body>
 </html>

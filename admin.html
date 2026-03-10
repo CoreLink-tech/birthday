@@ -140,36 +140,20 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const DEFAULTS = [
-    "photos/photo1.jpg",
-    "photos/photo2.jpg",
-    "photos/photo3.jpg",
-    "photos/photo4.jpg"
-  ];
+  const SUPA_URL = "https://npdssoxgimdtmjuerqfq.supabase.co";
+  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wZHNzb3hnaW1kdG1qdWVycWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwODAwNzAsImV4cCI6MjA4ODY1NjA3MH0.ArFq0MScykb0O0BMdS7l1jJrDpu86LUTstCAhr3g8nU";
+  const BUCKET = "photos";
+  const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
   const fileInput = document.getElementById("fileInput");
   const grid = document.getElementById("previewGrid");
   const statusHint = document.getElementById("statusHint");
-  let pending = [];
+  let pendingFiles = [];
 
   function setStatus(msg) {
     statusHint.textContent = msg || "";
-  }
-
-  function getStored() {
-    try {
-      const raw = localStorage.getItem("galleryImages");
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function setStored(list) {
-    localStorage.setItem("galleryImages", JSON.stringify(list));
   }
 
   function buildGrid(images) {
@@ -186,50 +170,61 @@
     });
   }
 
-  function loadInitial() {
-    const stored = getStored();
-    buildGrid(stored || DEFAULTS);
-    setStatus(stored ? "Loaded from saved gallery" : "Showing defaults");
+  async function loadExisting() {
+    const { data, error } = await supa.storage.from(BUCKET).list("", {
+      limit: 50,
+      sortBy: { column: "created_at", order: "desc" }
+    });
+    if (error) {
+      setStatus("Could not load existing images");
+      console.warn(error);
+      buildGrid([]);
+      return;
+    }
+    const urls = data.map(obj => supa.storage.from(BUCKET).getPublicUrl(obj.name).data.publicUrl);
+    buildGrid(urls);
+    setStatus("Loaded from Supabase");
   }
 
   fileInput.addEventListener("change", e => {
-    pending = Array.from(e.target.files || []).slice(0, 8);
-    if (!pending.length) {
+    pendingFiles = Array.from(e.target.files || []).slice(0, 8);
+    if (!pendingFiles.length) {
       setStatus("No files selected");
       return;
     }
-    const readers = pending.map(
-      file =>
-        new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = ev => resolve(ev.target.result);
-          reader.readAsDataURL(file);
-        })
-    );
-    Promise.all(readers).then(images => {
-      buildGrid(images);
-      pending = images;
-      setStatus("Ready to save");
-    });
+    setStatus(`${pendingFiles.length} file(s) ready to upload`);
   });
 
-  function save() {
-    if (!pending.length) {
+  async function save() {
+    if (!pendingFiles.length) {
       setStatus("Select images first");
       return;
     }
-    setStored(pending);
-    setStatus("Saved. Open PAGE1.HTML to view.");
+    setStatus("Uploading...");
+    for (const file of pendingFiles) {
+      const filename = `${Date.now()}-${file.name}`;
+      const { error } = await supa.storage.from(BUCKET).upload(filename, file, {
+        cacheControl: "3600",
+        upsert: false
+      });
+      if (error) {
+        setStatus(`Upload failed: ${file.name}`);
+        console.warn(error);
+        return;
+      }
+    }
+    pendingFiles = [];
+    fileInput.value = "";
+    setStatus("Upload complete");
+    loadExisting();
   }
 
-  function resetDefaults() {
-    localStorage.removeItem("galleryImages");
-    pending = [];
-    buildGrid(DEFAULTS);
-    setStatus("Reset to defaults");
+  async function resetDefaults() {
+    setStatus("Resetting to defaults (clearing custom uploads not implemented).");
+    loadExisting();
   }
 
-  loadInitial();
+  loadExisting();
 </script>
 </body>
 </html>
