@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0b1f2d" />
 <title>Happy Birthday Daddy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -171,6 +172,20 @@
   const navRow = document.getElementById("navRow");
   const TOTAL = pages.length;
   const darkPages = new Set([0, 2, 4]);
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prefersCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  const reducedEffects = prefersReducedMotion || prefersCoarsePointer;
+  let viewportWidth = window.innerWidth;
+  let viewportHeight = window.innerHeight;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchTracking = false;
+
+  function updateViewportMetrics() {
+    viewportWidth = window.innerWidth;
+    viewportHeight = window.innerHeight;
+    document.documentElement.style.setProperty("--app-height", viewportHeight + "px");
+  }
 
   function syncUi() {
     dots.forEach((dot, index) => {
@@ -243,28 +258,30 @@
   const petalColors = ["#ffd580", "#ff9860", "#ffb347", "#ffcba4", "#ff6b35"];
   const heroPage = document.getElementById("page1");
 
-  for (let i = 0; i < 10; i += 1) {
-    const petal = document.createElement("div");
-    petal.className = "petal";
-    petal.style.cssText = [
-      "position:absolute",
-      "border-radius:50% 0",
-      "opacity:.45",
-      "pointer-events:none",
-      "left:" + (Math.random() * 100).toFixed(2) + "%",
-      "top:-3rem",
-      "width:" + (10 + Math.random() * 14).toFixed(0) + "px",
-      "height:" + (10 + Math.random() * 14).toFixed(0) + "px",
-      "background:" + petalColors[i % petalColors.length],
-      "animation:petalFall " + (7 + Math.random() * 7).toFixed(2) + "s linear infinite",
-      "animation-delay:" + (Math.random() * 8).toFixed(2) + "s"
-    ].join(";");
-    heroPage.appendChild(petal);
-  }
+  if (!reducedEffects) {
+    for (let i = 0; i < 10; i += 1) {
+      const petal = document.createElement("div");
+      petal.className = "petal";
+      petal.style.cssText = [
+        "position:absolute",
+        "border-radius:50% 0",
+        "opacity:.45",
+        "pointer-events:none",
+        "left:" + (Math.random() * 100).toFixed(2) + "%",
+        "top:-3rem",
+        "width:" + (10 + Math.random() * 14).toFixed(0) + "px",
+        "height:" + (10 + Math.random() * 14).toFixed(0) + "px",
+        "background:" + petalColors[i % petalColors.length],
+        "animation:petalFall " + (7 + Math.random() * 7).toFixed(2) + "s linear infinite",
+        "animation-delay:" + (Math.random() * 8).toFixed(2) + "s"
+      ].join(";");
+      heroPage.appendChild(petal);
+    }
 
-  const petalStyle = document.createElement("style");
-  petalStyle.textContent = "@keyframes petalFall{0%{transform:translateY(-4rem) rotate(0deg);opacity:0;}16%{opacity:.45;}100%{transform:translateY(108vh) rotate(540deg);opacity:0;}}";
-  document.head.appendChild(petalStyle);
+    const petalStyle = document.createElement("style");
+    petalStyle.textContent = "@keyframes petalFall{0%{transform:translateY(-4rem) rotate(0deg);opacity:0;}16%{opacity:.45;}100%{transform:translateY(108vh) rotate(540deg);opacity:0;}}";
+    document.head.appendChild(petalStyle);
+  }
 
   const photoGrid = document.getElementById("photoGrid");
   const supabaseConfig = window.SUPABASE_CONFIG || {};
@@ -371,13 +388,18 @@
   let confettiFrame = null;
 
   function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    updateViewportMetrics();
+    const scale = Math.min(window.devicePixelRatio || 1, reducedEffects ? 1.1 : 1.5);
+    canvas.width = Math.floor(viewportWidth * scale);
+    canvas.height = Math.floor(viewportHeight * scale);
+    canvas.style.width = viewportWidth + "px";
+    canvas.style.height = viewportHeight + "px";
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
   }
 
   function animateConfetti() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles = particles.filter(particle => particle.y < canvas.height + 24);
+    ctx.clearRect(0, 0, viewportWidth, viewportHeight);
+    particles = particles.filter(particle => particle.y < viewportHeight + 24);
 
     particles.forEach(particle => {
       particle.x += particle.vx;
@@ -410,9 +432,15 @@
   }
 
   function launchConfetti() {
-    for (let i = 0; i < 80; i += 1) {
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    const particleCount = prefersCoarsePointer ? 42 : 80;
+
+    for (let i = 0; i < particleCount; i += 1) {
       particles.push({
-        x: Math.random() * canvas.width,
+        x: Math.random() * viewportWidth,
         y: -10 - Math.random() * 160,
         r: 5 + Math.random() * 8,
         color: petalColors[Math.floor(Math.random() * petalColors.length)],
@@ -429,10 +457,53 @@
     }
   }
 
+  pages.forEach(page => {
+    page.addEventListener("touchstart", event => {
+      if (event.touches.length !== 1) {
+        touchTracking = false;
+        return;
+      }
+
+      touchTracking = true;
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+    }, { passive: true });
+
+    page.addEventListener("touchend", event => {
+      if (!touchTracking || !event.changedTouches.length) {
+        return;
+      }
+
+      const deltaX = event.changedTouches[0].clientX - touchStartX;
+      const deltaY = event.changedTouches[0].clientY - touchStartY;
+      touchTracking = false;
+
+      if (Math.abs(deltaX) < 55 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) {
+        return;
+      }
+
+      if (deltaX < 0) {
+        goForward();
+      } else {
+        goBack();
+      }
+    }, { passive: true });
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && confettiFrame) {
+      cancelAnimationFrame(confettiFrame);
+      confettiFrame = null;
+    } else if (!document.hidden && particles.length && !confettiFrame) {
+      animateConfetti();
+    }
+  });
+
   resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("resize", resizeCanvas, { passive: true });
+  window.addEventListener("orientationchange", resizeCanvas);
   syncUi();
-  window.setTimeout(launchConfetti, 900);
+  window.setTimeout(launchConfetti, prefersCoarsePointer ? 500 : 900);
 
   fetchGallery();
 </script>

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#120c0d" />
 <title>Gallery Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,9 +18,19 @@
     --accent1:#e9834d;
     --accent2:#cfa34f;
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
+  *{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  html,body{
+    min-height:100%;
+    -webkit-text-size-adjust:100%;
+    overscroll-behavior:none;
+  }
   body{
-    min-height:100vh;
+    min-height:100dvh;
     background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.04), transparent 32%),
       radial-gradient(circle at 80% 12%, rgba(255,255,255,.05), transparent 30%),
       linear-gradient(145deg, #120c0d, #0c0a0a);
@@ -28,7 +39,11 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:1.6rem;
+    padding:
+      calc(1.25rem + env(safe-area-inset-top, 0px))
+      max(1rem, env(safe-area-inset-right, 0px))
+      calc(1.25rem + env(safe-area-inset-bottom, 0px))
+      max(1rem, env(safe-area-inset-left, 0px));
   }
   .card{
     width:min(960px, 100%);
@@ -39,7 +54,7 @@
     box-shadow:0 24px 70px rgba(0,0,0,.35);
   }
   h1{
-    font-size:1.4rem;
+    font-size:clamp(1.35rem, 4vw, 1.75rem);
     letter-spacing:.04em;
     margin-bottom:.45rem;
   }
@@ -81,6 +96,7 @@
     align-items:center;
   }
   .btn{
+    min-height:3.25rem;
     padding:.8rem 1.1rem;
     border-radius:12px;
     border:1px solid var(--border);
@@ -89,6 +105,7 @@
     font-weight:800;
     letter-spacing:.06em;
     cursor:pointer;
+    touch-action:manipulation;
     transition:transform .2s ease, box-shadow .2s ease;
   }
   .btn.secondary{
@@ -104,6 +121,7 @@
     font-size:.92rem;
   }
   .drop{
+    min-height:4.2rem;
     border:1px dashed rgba(255,255,255,.25);
     border-radius:14px;
     padding:1rem;
@@ -111,15 +129,54 @@
     margin:1rem 0;
     color:var(--muted);
     cursor:pointer;
+    touch-action:manipulation;
     transition:border-color .2s ease, background .2s ease;
   }
   .drop:hover{
     border-color:rgba(255,255,255,.45);
     background:rgba(255,255,255,.04);
   }
+  @media (max-width:720px){
+    body{
+      align-items:flex-start;
+    }
+    .card{
+      border-radius:16px;
+      padding:1.2rem;
+    }
+    .grid{
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:.65rem;
+    }
+    .hint{
+      width:100%;
+      line-height:1.6;
+    }
+  }
   @media (max-width:640px){
     .controls{flex-direction:column;align-items:stretch;}
     .btn{width:100%;text-align:center;}
+    .grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:420px){
+    body{
+      padding:
+        calc(1rem + env(safe-area-inset-top, 0px))
+        max(.85rem, env(safe-area-inset-right, 0px))
+        calc(1rem + env(safe-area-inset-bottom, 0px))
+        max(.85rem, env(safe-area-inset-left, 0px));
+    }
+    .card{
+      padding:1rem;
+    }
+    .grid{
+      grid-template-columns:1fr;
+    }
+    .drop{
+      padding:.95rem;
+      font-size:.95rem;
+      line-height:1.55;
+    }
   }
 </style>
 </head>
