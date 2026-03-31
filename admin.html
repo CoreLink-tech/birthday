@@ -140,12 +140,14 @@
     </div>
   </div>
 
+<script src="supabase-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPA_URL = "https://npdssoxgimdtmjuerqfq.supabase.co";
-  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wZHNzb3hnaW1kdG1qdWVycWZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwODAwNzAsImV4cCI6MjA4ODY1NjA3MH0.ArFq0MScykb0O0BMdS7l1jJrDpu86LUTstCAhr3g8nU";
-  const BUCKET = "photos";
-  const supa = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  const supabaseConfig = window.SUPABASE_CONFIG || {};
+  const SUPA_URL = supabaseConfig.url || "";
+  const SUPA_KEY = supabaseConfig.anonKey || "";
+  const BUCKET = supabaseConfig.bucket || "photos";
+  const supa = SUPA_URL && SUPA_KEY ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
 
   const fileInput = document.getElementById("fileInput");
   const grid = document.getElementById("previewGrid");
@@ -171,6 +173,11 @@
   }
 
   async function loadExisting() {
+    if (!supa) {
+      setStatus("Supabase config missing. Run scripts/generate-supabase-config.ps1 after setting .env.");
+      return buildGrid([]);
+    }
+
     const { data, error } = await supa.storage.from(BUCKET).list("", {
       limit: 50,
       sortBy: { column: "created_at", order: "desc" }
@@ -195,6 +202,11 @@
   });
 
   async function save() {
+    if (!supa) {
+      setStatus("Supabase config missing. Run scripts/generate-supabase-config.ps1 after setting .env.");
+      return;
+    }
+
     if (!pendingFiles.length) {
       setStatus("Select images first");
       return;
